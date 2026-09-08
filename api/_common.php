@@ -5,6 +5,7 @@ declare(strict_types=1);
 define('DATA_DIR', dirname(__DIR__) . '/data');
 define('LATEST_FILE', DATA_DIR . '/latest.json');
 define('HISTORY_FILE', DATA_DIR . '/history.jsonl');
+define('ATTEMPT_LOG', DATA_DIR . '/receiver.log');
 
 function json_out($data, int $code = 200): void {
     http_response_code($code);
@@ -27,6 +28,28 @@ function load_config(): array {
     return $cfg;
 }
 
+// Remember every attempt to reach the receiver, so setup/status pages can show
+// "the phone is trying but the token is wrong" vs "nothing has arrived at all".
+function log_attempt(string $outcome): void {
+    if (!is_dir(DATA_DIR)) @mkdir(DATA_DIR, 0755, true);
+    $line = json_encode([
+        't' => time(),
+        'outcome' => $outcome,
+        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+        'ip' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? ''),
+        'ua' => substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 80),
+    ]);
+    @file_put_contents(ATTEMPT_LOG, $line . "\n", FILE_APPEND | LOCK_EX);
+}
+
+function recent_attempts(int $n = 10): array {
+    if (!is_file(ATTEMPT_LOG)) return [];
+    $lines = file(ATTEMPT_LOG, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    $out = [];
+    foreach (array_slice($lines, -$n) as $l) { $j = json_decode($l, true); if (is_array($j)) $out[] = $j; }
+    return array_reverse($out);
+}
+
 function require_token(array $cfg): void {
     $given = $_GET['token'] ?? '';
     // OwnTracks can also send HTTP basic auth; accept the token as the password too.
@@ -34,6 +57,7 @@ function require_token(array $cfg): void {
         $given = $_SERVER['PHP_AUTH_PW'];
     }
     if (!is_string($given) || !hash_equals((string)$cfg['token'], $given)) {
+        if (basename($_SERVER['SCRIPT_NAME'] ?? '') === 'owntracks.php') log_attempt('bad-token');
         json_out(['error' => 'bad token'], 403);
     }
 }

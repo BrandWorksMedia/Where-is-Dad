@@ -11,7 +11,8 @@ $cfg = load_config();
 require_token($cfg);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_out(['ok' => true, 'hint' => 'POST OwnTracks JSON here'], 200);
+    log_attempt('get-ok-token');
+    json_out(['ok' => true, 'hint' => 'Token is right. OwnTracks will POST locations here.'], 200);
 }
 
 $raw = file_get_contents('php://input');
@@ -19,6 +20,8 @@ $p = json_decode((string)$raw, true);
 
 // OwnTracks also posts "transition", "waypoint", "lwt" etc.  We only care about locations.
 if (!is_array($p) || ($p['_type'] ?? '') !== 'location' || !isset($p['lat'], $p['lon'])) {
+    log_attempt('ignored-' . (is_array($p) ? (string)($p['_type'] ?? 'no-type') : 'not-json'));
+    header('Content-Type: application/json');
     echo '[]';   // OwnTracks expects a JSON array back
     exit;
 }
@@ -52,6 +55,7 @@ if ($prev === null || (int)($prev['tst'] ?? 0) <= $loc['tst']) {
     rename($tmp, LATEST_FILE);
 }
 file_put_contents(HISTORY_FILE, json_encode($loc) . "\n", FILE_APPEND | LOCK_EX);
+log_attempt('location-ok');
 
 header('Content-Type: application/json');
 echo '[]';

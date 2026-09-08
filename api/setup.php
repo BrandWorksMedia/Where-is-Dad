@@ -111,6 +111,12 @@ return ['token' =&gt; '<?= $h($token) ?>'];</pre>
   <p><?= $state === 'new' ? 'The secret was just created on the server.' : 'Here they are again.' ?> Do the two steps below and the map is live.</p>
 </div>
 
+<div class="card" id="conn-card">
+  <h2>Is the phone connected? <span id="conn-dot">⏳</span></h2>
+  <p id="conn-text">Checking…</p>
+  <p id="conn-detail"><small></small></p>
+</div>
+
 <div class="card">
   <h2>1. Dad's iPhone: OwnTracks</h2>
   <p>Install <b>OwnTracks</b> from the App Store, then <b>on the iPhone</b> tap this button. It fills in everything (HTTP mode, this URL, Move mode):</p>
@@ -138,6 +144,45 @@ return ['token' =&gt; '<?= $h($token) ?>'];</pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   try { new QRCode(document.getElementById('qr'), { text: <?= json_encode($otLink) ?>, width: 200, height: 200 }); } catch (e) {}
+
+  // Live connection check: polls the status endpoint every 5 seconds.
+  (function () {
+    const statusUrl = <?= json_encode("$base/api/admin.php?token=$token&action=status") ?>;
+    const dot = document.getElementById('conn-dot'), text = document.getElementById('conn-text'), detail = document.getElementById('conn-detail');
+    const ago = s => s < 60 ? Math.round(s) + ' s ago' : s < 3600 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago';
+    async function check() {
+      try {
+        const j = await (await fetch(statusUrl + '&_=' + Date.now(), { cache: 'no-store' })).json();
+        const now = j.server_time || Math.floor(Date.now() / 1000);
+        const att = (j.recent_attempts || [])[0];
+        if (j.latest) {
+          dot.textContent = '🟢';
+          text.innerHTML = '<b>Yes! The phone is reporting.</b> Last position ' + ago(now - j.latest.tst) +
+            ' (' + j.latest.lat.toFixed(3) + ', ' + j.latest.lon.toFixed(3) + ')' + (j.latest.vel != null ? ', ' + Math.round(j.latest.vel * 0.621) + ' mph' : '') + '.';
+          detail.innerHTML = '<small>' + j.history_points + ' points so far. The map is live: <a href="<?= $h($base) ?>/"><?= $h($base) ?></a></small>';
+        } else if (att && att.outcome === 'bad-token') {
+          dot.textContent = '🟠';
+          text.innerHTML = '<b>The phone reached the server ' + ago(now - att.t) + ', but with the wrong secret.</b> Re-tap the configure button below, or paste the URL below into OwnTracks exactly.';
+          detail.innerHTML = '<small>Seen: ' + (att.ua || 'unknown app') + '</small>';
+        } else if (att && att.outcome && att.outcome.startsWith('ignored')) {
+          dot.textContent = '🟠';
+          text.innerHTML = '<b>Something reached the server ' + ago(now - att.t) + ' but it was not a location</b> (' + att.outcome.replace('ignored-', '') + '). In OwnTracks, tap the publish arrow (↑) once.';
+          detail.innerHTML = '<small>Seen: ' + (att.ua || 'unknown app') + '</small>';
+        } else if (att && att.outcome === 'get-ok-token') {
+          dot.textContent = '🟠';
+          text.innerHTML = '<b>The URL and secret are right</b> (something opened it ' + ago(now - att.t) + '), but OwnTracks has not sent a location yet. Open OwnTracks and tap the publish arrow (↑).';
+          detail.innerHTML = '';
+        } else {
+          dot.textContent = '🔴';
+          text.innerHTML = '<b>Nothing from the phone yet.</b> Do step 1 below, then in OwnTracks tap the publish arrow (↑) at the top. This box turns green by itself.';
+          detail.innerHTML = '<small>Checklist: Mode = HTTP · URL pasted exactly · Location permission = Always · not in Quiet/Manual mode.</small>';
+        }
+      } catch (e) {
+        dot.textContent = '⚠️'; text.textContent = 'Could not reach the status endpoint: ' + e;
+      }
+    }
+    check(); setInterval(check, 5000);
+  })();
 </script>
 <?php endif; ?>
 

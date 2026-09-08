@@ -17,6 +17,7 @@ $action = $_GET['action'] ?? 'status';
 if ($action === 'reset') {
     @unlink(LATEST_FILE);
     @unlink(HISTORY_FILE);
+    @unlink(ATTEMPT_LOG);
     json_out(['ok' => true, 'message' => 'Trail cleared. The map is back to "Dad hasn\'t left yet".']);
 }
 
@@ -40,6 +41,8 @@ json_out([
     'ok' => true,
     'latest' => read_latest(),
     'history_points' => $lines,
+    'recent_attempts' => recent_attempts(10),
+    'server_time' => time(),
     'data_dir_writable' => is_writable(DATA_DIR),
     'php' => PHP_VERSION,
 ]);
