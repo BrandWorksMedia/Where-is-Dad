@@ -40,8 +40,8 @@ That page is only ever shown once without the secret. To see it again use
 Without it, change the text in `api/reset-secret.txt`, push, wait for the deploy, and open
 `…/api/setup.php` once: it shows a brand-new secret. Update OwnTracks afterwards.
 
-`data/` (live positions) and `api/config.php` (the secret) are git-ignored and blocked
-from the web, so redeploys never wipe the trip or the secret.
+`data/` holds the live positions and the secret (`data/config.json`). It is git-ignored and
+blocked from the web, so redeploys never wipe the trip or the secret.
 
 ### Alternative: fully automatic through the Hostinger API
 If you would rather not open hPanel at all: hPanel → profile menu → **Account → API → Generate new token**, then

@@ -3,7 +3,7 @@
 //  One-time setup page.  Visit https://bambamgo.com/api/setup.php
 //  right after the site is deployed from GitHub.
 //
-//  First visit: creates api/config.php with a random secret and shows
+//  First visit: creates data/config.json with a random secret and shows
 //  the OwnTracks URL + a tap-to-configure link for the iPhone.
 //  Later visits: only show the secret again if you already know it
 //  (?token=...), so nobody else can read it.
@@ -11,7 +11,6 @@
 declare(strict_types=1);
 require __DIR__ . '/_common.php';
 
-$configFile = __DIR__ . '/config.php';
 $host = $_SERVER['HTTP_HOST'] ?? 'bambamgo.com';
 $base = 'https://' . $host;
 $token = null;
@@ -19,12 +18,10 @@ $state = 'new';
 
 $existing = null;
 $storedResetId = '';
-if (is_file($configFile)) {
-    $cfg = require $configFile;
-    if (is_array($cfg) && !empty($cfg['token']) && $cfg['token'] !== 'CHANGE-ME-to-a-long-random-secret') {
-        $existing = (string)$cfg['token'];
-        $storedResetId = (string)($cfg['reset_id'] ?? '');
-    }
+$cfg = read_config();
+if ($cfg !== null) {
+    $existing = (string)$cfg['token'];
+    $storedResetId = (string)($cfg['reset_id'] ?? '');
 }
 
 // A new api/reset-secret.txt (pushed through GitHub) forces one fresh secret.
@@ -108,9 +105,7 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 <?php elseif ($state === 'unwritable'): ?>
 <div class="card">
   <h1>Almost 😬</h1>
-  <p class="warn">PHP could not write <code>api/config.php</code>. In hPanel's File Manager, create that file with this content and reload:</p>
-  <pre class="box">&lt;?php
-return ['token' =&gt; '<?= $h($token) ?>'];</pre>
+  <p class="warn">PHP could not write <code>data/config.json</code>. In hPanel's File Manager make sure the <code>data</code> folder exists and is writable, then reload.</p>
 </div>
 
 <?php else: ?>
