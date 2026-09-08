@@ -4,3 +4,6 @@ data/*
 !data/.htaccess
 !data/.gitkeep
 .DS_Store
+
+# zero-touch deploy state (secret token + site record)
+.hostinger/

@@ -20,7 +20,21 @@ files, so it runs on the same Hostinger shared hosting as brandworksmedia.com.
 
 ## 1. Put it on Hostinger (bambamgo.com)
 
-### Option A: Git deploy (recommended)
+### Option 0: fully automatic (recommended, nothing to click)
+One Hostinger API token does everything: creates the bambamgo.com website on
+the plan that already hosts brandworksmedia.com, generates the OwnTracks secret,
+uploads and deploys the site, checks DNS, and waits for https to answer.
+
+1. hPanel → profile menu (top right) → **Account → API → Generate new token**.
+2. Run:
+   ```bash
+   HOSTINGER_API_TOKEN=xxxx python3 deploy/hostinger_deploy.py
+   ```
+   Plain Python 3, no packages. It prints the map URL and the exact OwnTracks URL
+   (with the secret) at the end. The secret lives in `.hostinger/secret.json`,
+   which git ignores. Re-run with `--redeploy` after any change to the site.
+
+### Option A: Git deploy
 1. hPanel → **Websites** → bambamgo.com → **Advanced → Git**.
 2. Repository: `https://github.com/BrandWorksMedia/Where-is-Dad`, branch: the one you want live (e.g. `main`), install path: leave blank (that is `public_html`).
    *If the repo is private, copy the SSH key hPanel shows and add it to GitHub → repo → Settings → Deploy keys.*
@@ -30,7 +44,7 @@ files, so it runs on the same Hostinger shared hosting as brandworksmedia.com.
 ### Option B: File Manager
 Zip the project, upload to `domains/bambamgo.com/public_html`, extract.
 
-### Then, either way: create the secret
+### Then (options A and B only): create the secret
 1. hPanel → **File Manager** → `public_html/api/`.
 2. Copy `config.example.php` to **`config.php`** and replace the token with a long random string
    (for example run `openssl rand -hex 16` on a Mac, or just mash the keyboard).
@@ -125,7 +139,8 @@ assets/icon*.png|svg     home-screen icons
 api/owntracks.php        receives OwnTracks posts  (POST, token required)
 api/location.php         latest position + trail for the iPad  (GET, public)
 api/admin.php            status / reset / fake position  (token required)
-api/config.example.php   copy to api/config.php and set the token
+api/config.example.php   copy to api/config.php and set the token (Option 0 does this for you)
+deploy/hostinger_deploy.py  zero-touch deploy through the Hostinger API
 data/                    live position files (created by PHP, not in git)
 ```
 
