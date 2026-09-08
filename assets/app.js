@@ -257,6 +257,25 @@
     }, 1000);
   }
 
+  // ---------------- big-map mode ----------------
+  // One tap hides everything but the map; the choice survives reloads.
+  (function () {
+    const btn = $("fullmap-btn");
+    let on = false;
+    try { on = localStorage.getItem("fullmap") === "1"; } catch (e) {}
+    function apply() {
+      document.body.classList.toggle("fullmap", on);
+      btn.setAttribute("aria-label", on ? "Show everything" : "Big map");
+      btn.title = on ? "Show everything" : "Big map";
+    }
+    btn.addEventListener("click", () => {
+      on = !on;
+      try { localStorage.setItem("fullmap", on ? "1" : "0"); } catch (e) {}
+      apply();
+    });
+    apply();
+  })();
+
   // ---------------- clock + housekeeping ----------------
   function tickClock() {
     const d = new Date();
