@@ -188,5 +188,18 @@ window.MAP = (function () {
     return { svg: s, viewBox: `0 0 ${W} ${H}`, W, H };
   }
 
-  return { proj, render, W, H, LON_MIN, LON_MAX, LAT_MIN, LAT_MAX };
+  // Which state is this point in?  Ray casting against the cartoon polygons.
+  function stateAt(lon, lat) {
+    for (const st of states) {
+      const p = st.poly; let inside = false;
+      for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+        const [xi, yi] = p[i], [xj, yj] = p[j];
+        if ((yi > lat) !== (yj > lat) && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+      }
+      if (inside) return { id: st.id, name: st.name, fill: st.fill };
+    }
+    return null;
+  }
+
+  return { proj, render, stateAt, W, H, LON_MIN, LON_MAX, LAT_MIN, LAT_MAX };
 })();

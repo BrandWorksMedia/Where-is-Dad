@@ -7,6 +7,7 @@
   const M = window.MAP;
   const L = T.landmarks;
   const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
 
   // ---------------- geometry helpers ----------------
   const R_MI = 3958.8;
@@ -127,6 +128,7 @@
     const toFinish = haversine(p, finish);
 
     placeTruck(loc.lat, loc.lon, loc.cog, moving);
+    stateWatch(loc.lat, loc.lon, stale);
     document.body.classList.toggle("stale", stale);
     document.body.classList.toggle("moving", moving);
 
@@ -193,11 +195,86 @@
     trailEl.setAttribute("points", points.map(q => { const p = M.proj(q.lon, q.lat); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" "));
   }
 
+  // ---------------- horn (Web Audio, no sound files) ----------------
+  // Browsers only allow sound after the first tap on the page.
+  const horn = (function () {
+    let ctx = null, unlocked = false;
+    const pill = $("sound-pill");
+    function unlock() {
+      if (unlocked) return;
+      try {
+        ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+        ctx.resume().then(() => {
+          const o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0.0001;
+          o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.05);
+        });
+        unlocked = true; pill.hidden = true;
+      } catch (e) { /* no audio available */ }
+    }
+    ["touchend", "click", "keydown"].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
+    setTimeout(() => { if (!unlocked && !params.has("quiet")) pill.hidden = false; }, 2000);
+
+    // One cartoon honk: two detuned saw waves through a low-pass, with a quick envelope.
+    function honk(at, dur) {
+      const g = ctx.createGain(), f = ctx.createBiquadFilter();
+      f.type = "lowpass"; f.frequency.value = 1400;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.5, at + 0.02);
+      g.gain.setValueAtTime(0.5, at + dur - 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      [415, 523].forEach(fr => {
+        const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = fr;
+        o.connect(f); o.start(at); o.stop(at + dur + 0.05);
+      });
+      f.connect(g).connect(ctx.destination);
+    }
+    function play(pattern) {
+      if (!unlocked || !ctx) return false;
+      let t = ctx.currentTime + 0.05;
+      for (const [d, gap] of pattern) { honk(t, d); t += d + gap; }
+      return true;
+    }
+    return {
+      beepBeep: () => play([[0.18, 0.12], [0.28, 0]]),
+      arrival:  () => play([[0.15, 0.1], [0.15, 0.1], [0.15, 0.1], [0.9, 0]])
+    };
+  })();
+
+  // ---------------- state-line crossings ----------------
+  const stateWatch = (function () {
+    let known = null;      // state id we last announced / started in
+    let candidate = null, candidateHits = 0;
+    try { known = localStorage.getItem("lastState") || null; } catch (e) {}
+    const banner = $("state-banner");
+    let hideTimer = null;
+    function show(st) {
+      $("sb-state").textContent = st.name.charAt(0) + st.name.slice(1).toLowerCase();
+      banner.style.background = st.fill;
+      banner.classList.remove("out"); banner.hidden = false;
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => { banner.classList.add("out"); setTimeout(() => { banner.hidden = true; }, 450); }, 12000);
+    }
+    return function update(lat, lon, stale) {
+      if (!T.hornOnStateLines || stale) return;
+      const st = M.stateAt(lon, lat);
+      if (!st) return;                                   // over water / off the map: keep last state
+      if (known === null) { known = st.id; try { localStorage.setItem("lastState", known); } catch (e) {} return; }
+      if (st.id === known) { candidate = null; candidateHits = 0; return; }
+      // need the new state twice in a row so a wobbly GPS point near a border doesn't honk
+      if (candidate === st.id) candidateHits++; else { candidate = st.id; candidateHits = 1; }
+      if (candidateHits < 2) return;
+      known = st.id; candidate = null; candidateHits = 0;
+      try { localStorage.setItem("lastState", known); } catch (e) {}
+      show(st); horn.beepBeep();
+    };
+  })();
+
   // ---------------- confetti ----------------
   function celebrate() {
     if (arrivedShown) return;
     arrivedShown = true;
     document.body.classList.add("arrived");
+    if (T.hornOnArrival) horn.arrival();
     const c = $("confetti");
     const colors = ["#ff5a5a", "#ffe66d", "#6dd3ff", "#8bff8b", "#ff9de2", "#ffb347"];
     for (let i = 0; i < 90; i++) {
@@ -289,7 +366,6 @@
   $("driver-name").textContent = T.driverName;
   document.title = `Where is ${T.driverName}?`;
 
-  const params = new URLSearchParams(location.search);
   if (params.has("demo")) { demo(); }
   else { showWaiting(); poll(); setInterval(poll, T.pollSeconds * 1000); }
 })();

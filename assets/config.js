@@ -20,6 +20,11 @@ window.TRIP = {
   // How close (miles) to a landmark counts as "Dad is in ___"
   nearMiles: 15,
 
+  // Beep the horn + show a banner when the truck crosses a state line
+  hornOnStateLines: true,
+  // Extra long honk when Dad arrives
+  hornOnArrival: true,
+
   // Landmarks along the route, in driving order.  Miami first, Tomball last.
   // The road on the map is drawn through these points, so keep them in order.
   //   minor: true  -> small dot + small label (still used for "Dad is near")
