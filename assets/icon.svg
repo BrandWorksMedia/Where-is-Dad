@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#bfe9ff"/>
+  <circle cx="420" cy="92" r="46" fill="#ffd93d" stroke="#2d2a32" stroke-width="10"/>
+  <path d="M0 330 Q 128 290 256 330 T 512 330 L512 512 L0 512Z" fill="#b6ee9b"/>
+  <rect x="0" y="392" width="512" height="70" fill="#5b5b6b"/>
+  <path d="M0 427 H512" stroke="#ffd93d" stroke-width="8" stroke-dasharray="40 30"/>
+  <g transform="translate(256,400) scale(2.3)">
+    <path d="M -66,-16 L -66,-40 Q -66,-46 -60,-46 L -34,-46 L -22,-70 Q -20,-74 -14,-74 L 12,-74 L 12,-48 L 62,-48 Q 66,-48 66,-44 L 66,-14 Q 66,-10 62,-10 L -62,-10 Q -66,-10 -66,-16 Z" fill="#fff" stroke="#2d2a32" stroke-width="4" stroke-linejoin="round"/>
+    <line x1="12" y1="-48" x2="12" y2="-10" stroke="#2d2a32" stroke-width="4"/>
+    <path d="M -29,-46 L -19,-66 L 8,-66 L 8,-46 Z" fill="#a9e2ff" stroke="#2d2a32" stroke-width="4"/>
+    <circle cx="-4" cy="-56" r="7" fill="#f2c49b" stroke="#2d2a32" stroke-width="2.5"/>
+    <path d="M -11,-58 Q -4,-66 3,-58 Z" fill="#2d2a32"/>
+    <rect x="-70" y="-22" width="12" height="9" rx="3" fill="#8f979e" stroke="#2d2a32" stroke-width="2.5"/>
+    <circle cx="-61" cy="-31" r="4" fill="#ffe66d" stroke="#2d2a32" stroke-width="2.5"/>
+    <rect x="60" y="-34" width="6" height="8" rx="2" fill="#ff5a5a" stroke="#2d2a32" stroke-width="2.5"/>
+    <g transform="translate(-40,-6)"><circle r="15" fill="#2d2a32"/><circle r="6" fill="#cfd6dc"/></g>
+    <g transform="translate(42,-6)"><circle r="15" fill="#2d2a32"/><circle r="6" fill="#cfd6dc"/></g>
+  </g>
+</svg>

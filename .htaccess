@@ -1,0 +1,20 @@
+# bambamgo.com  —  Where is Dad?
+RewriteEngine On
+
+# Always use https (OwnTracks and the iPad both need it)
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Hide repo housekeeping
+RedirectMatch 404 /\.git
+<FilesMatch "^(README\.md|\.gitignore|\.gitkeep)$">
+  Require all denied
+</FilesMatch>
+
+# The page must never be cached stale on the iPad
+<FilesMatch "\.(html|js|css|webmanifest)$">
+  Header set Cache-Control "no-cache, must-revalidate"
+</FilesMatch>
+
+AddType application/manifest+json .webmanifest

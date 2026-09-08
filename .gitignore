@@ -1,0 +1,6 @@
+# secrets + live data never go to git
+api/config.php
+data/*
+!data/.htaccess
+!data/.gitkeep
+.DS_Store

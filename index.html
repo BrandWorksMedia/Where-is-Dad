@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Where is Dad?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Where is Dad?">
+  <meta name="theme-color" content="#bfe9ff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div id="greeting">Hi!</div>
+      <h1>Where is <span id="driver-name">Dad</span>? 🚙</h1>
+      <div id="clock">--:--</div>
+    </header>
+
+    <div id="map-wrap">
+      <div id="offline" hidden>📶 Reconnecting…</div>
+      <div id="demo-badge" hidden>DEMO TRIP</div>
+      <svg id="map" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div id="dash">
+      <div id="where" class="card">
+        <h2 id="headline">Looking for Dad…</h2>
+        <p id="subline"></p>
+        <p id="fact"></p>
+      </div>
+
+      <div id="stats" class="card">
+        <div class="stat"><div class="v"><span id="speed">–</span><small> mph</small></div><div class="k">Speed</div></div>
+        <div class="stat"><div class="v" id="next-name">–</div><div class="k">Next stop <span id="next-miles"></span></div></div>
+        <div class="stat"><div class="v" id="eta">–</div><div class="k" id="eta-label">left until Tomball</div></div>
+      </div>
+
+      <div id="progress" class="card">
+        <div id="pb">
+          <div id="pb-fill"></div>
+          <div id="pb-marks"></div>
+          <div id="pb-truck">🛻</div>
+        </div>
+        <div id="pb-text">
+          <span><b id="miles-done">0</b> miles driven</span>
+          <span class="pb-mid">updated <b id="updated">–</b> · phone battery <b id="battery">–</b></span>
+          <span><b id="miles-left">0</b> miles to go</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="confetti"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/map.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

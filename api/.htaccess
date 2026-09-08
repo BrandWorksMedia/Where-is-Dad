@@ -1,0 +1,4 @@
+# Never serve the example/config files as text
+<FilesMatch "^(config\.php|config\.example\.php|_common\.php)$">
+  Require all denied
+</FilesMatch>
