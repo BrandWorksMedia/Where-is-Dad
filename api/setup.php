@@ -126,7 +126,8 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   <p><a class="btn" href="<?= $h($otLink) ?>">Configure OwnTracks on this iPhone</a></p>
   <p><small>Reading this on the iPad or a computer? Scan this with the iPhone camera instead:</small></p>
   <div id="qr"></div>
-  <p><small>If the button does nothing, set it by hand in OwnTracks → (i) → Settings: Mode <b>HTTP</b>, URL below, Device ID <b>tacoma</b>, Tracker ID <b>DA</b>, then tap the mode icon on the map until it says <b>Move</b>.</small></p>
+  <p><small>If OwnTracks says <b>"URI or file configuration not allowed"</b>: in OwnTracks tap the (i) icon → Settings, scroll down and switch on the toggle that allows configuration by URL / file (added in OwnTracks 26.2), then tap the button again.</small></p>
+  <p><small>Or set it by hand in OwnTracks → (i) → Settings: Mode <b>HTTP</b>, URL below, Device ID <b>tacoma</b>, Tracker ID <b>DA</b>, then tap the mode icon on the map until it says <b>Move</b>.</small></p>
   <span class="box"><?= $h($otUrl) ?></span>
   <p><small>Then allow Location <b>Always</b> when iOS asks, and tap the publish arrow once.</small></p>
 </div>
