@@ -20,43 +20,43 @@ files, so it runs on the same Hostinger shared hosting as brandworksmedia.com.
 
 ## 1. Put it on Hostinger (bambamgo.com)
 
-### Option 0: fully automatic (recommended, nothing to click)
-One Hostinger API token does everything: creates the bambamgo.com website on
-the plan that already hosts brandworksmedia.com, generates the OwnTracks secret,
-uploads and deploys the site, checks DNS, and waits for https to answer.
+It is a plain PHP site, so Hostinger can pull it straight from GitHub.
+Nothing to edit on the server: the site creates its own secret on first visit.
 
-1. hPanel → profile menu (top right) → **Account → API → Generate new token**.
-2. Run:
-   ```bash
-   HOSTINGER_API_TOKEN=xxxx python3 deploy/hostinger_deploy.py
-   ```
-   Plain Python 3, no packages. It prints the map URL and the exact OwnTracks URL
-   (with the secret) at the end. The secret lives in `.hostinger/secret.json`,
-   which git ignores. Re-run with `--redeploy` after any change to the site.
+1. hPanel → **Websites → Add website** → pick **bambamgo.com** (it is already in the account) → choose the empty/"other" site type, not WordPress.
+2. Open that website's dashboard → **Advanced → Git** → *Create a new repository*:
+   - Repository: `https://github.com/BrandWorksMedia/Where-is-Dad`
+   - Branch: `claude/roadtrip-tracker-map-ab2mrt` (or `main` once it exists)
+   - Install path: leave empty (deploys into `public_html`)
+   - Click **Create**, then **Deploy**. Turn on **Auto deployment** so future pushes go live by themselves.
+3. Make sure the free SSL is on for bambamgo.com (hPanel → Security → SSL). It usually is within minutes.
+4. Open **https://bambamgo.com/api/setup.php** once. It creates the secret, shows the OwnTracks URL,
+   and gives a *Configure OwnTracks on this iPhone* button (and a QR code to scan from the iPad).
 
-### Option A: Git deploy
-1. hPanel → **Websites** → bambamgo.com → **Advanced → Git**.
-2. Repository: `https://github.com/BrandWorksMedia/Where-is-Dad`, branch: the one you want live (e.g. `main`), install path: leave blank (that is `public_html`).
-   *If the repo is private, copy the SSH key hPanel shows and add it to GitHub → repo → Settings → Deploy keys.*
-3. Click **Deploy**. Turn on **Auto deployment** if you want pushes to go live automatically.
-4. Make sure the free SSL certificate is installed for bambamgo.com (hPanel → Security → SSL). Both OwnTracks and the iPad need https.
+That page is only ever shown once without the secret. To see it again use
+`https://bambamgo.com/api/setup.php?token=YOUR-SECRET`.
 
-### Option B: File Manager
-Zip the project, upload to `domains/bambamgo.com/public_html`, extract.
+`data/` (live positions) and `api/config.php` (the secret) are git-ignored and blocked
+from the web, so redeploys never wipe the trip or the secret.
 
-### Then (options A and B only): create the secret
-1. hPanel → **File Manager** → `public_html/api/`.
-2. Copy `config.example.php` to **`config.php`** and replace the token with a long random string
-   (for example run `openssl rand -hex 16` on a Mac, or just mash the keyboard).
-3. Check it works: open `https://bambamgo.com/api/admin.php?token=YOUR-TOKEN&action=status`.
-   You should see `"ok": true` and `"data_dir_writable": true`.
+### Alternative: fully automatic through the Hostinger API
+If you would rather not open hPanel at all: hPanel → profile menu → **Account → API → Generate new token**, then
 
-`data/` is where the live positions are stored. It is blocked from the web by
-`.htaccess` and ignored by git, so redeploys never wipe the trip.
+```bash
+HOSTINGER_API_TOKEN=xxxx python3 deploy/hostinger_deploy.py
+```
+
+creates the website, uploads and deploys the site, generates the secret, checks DNS and waits
+for https to answer. Plain Python 3, no packages. Re-run with `--redeploy` after changes.
+
+### Alternative: File Manager
+Zip the project, upload to `domains/bambamgo.com/public_html`, extract, then open `/api/setup.php`.
 
 ---
 
 ## 2. Set up OwnTracks on Dad's iPhone
+
+Easiest: on the iPhone, open the setup page from step 1 and tap **Configure OwnTracks on this iPhone**. It fills in everything below. By hand:
 
 1. Install **OwnTracks** from the App Store. Allow Location **Always** and Precise Location on.
 2. Tap the (i) / settings icon:
@@ -139,7 +139,8 @@ assets/icon*.png|svg     home-screen icons
 api/owntracks.php        receives OwnTracks posts  (POST, token required)
 api/location.php         latest position + trail for the iPad  (GET, public)
 api/admin.php            status / reset / fake position  (token required)
-api/config.example.php   copy to api/config.php and set the token (Option 0 does this for you)
+api/setup.php            one-time page: creates the secret, shows the OwnTracks URL + one-tap config
+api/config.example.php   only needed if you set the secret by hand
 deploy/hostinger_deploy.py  zero-touch deploy through the Hostinger API
 data/                    live position files (created by PHP, not in git)
 ```
