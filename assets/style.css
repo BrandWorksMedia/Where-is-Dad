@@ -172,3 +172,54 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
   .stat .v { font-size: clamp(22px, 3.4vw, 36px); }
   #progress { padding: 14px 18px 12px; }
 }
+
+/* ---------- wide but short screens (phone in landscape, small browser window) ---------- */
+@media (orientation: landscape) and (max-height: 640px) {
+  #app { display: grid; grid-template-columns: 1.5fr 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 6px 10px; padding: 6px 10px 8px; }
+  header { grid-column: 1 / -1; }
+  header h1 { font-size: 22px; }
+  #greeting { font-size: 15px; }
+  #clock { font-size: 17px; padding: 2px 10px; border-width: 2px; }
+  #map-wrap { min-height: 0; border-radius: 18px; border-width: 3px; }
+  #dash { display: grid; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; min-height: 0; }
+  #progress { grid-column: auto; }
+  .card { padding: 6px 12px; border-radius: 14px; border-width: 3px; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
+  #where { overflow: hidden; }
+  #headline { font-size: clamp(17px, 5.2vh, 30px); }
+  #subline { font-size: clamp(12px, 3.4vh, 18px); margin-top: 3px; }
+  #fact { font-size: clamp(11px, 3vh, 15px); padding: 3px 8px; margin-top: 4px; }
+  #stats { grid-template-columns: 0.8fr 1.4fr 1fr; padding: 6px 8px; gap: 4px; }
+  .stat .v { font-size: clamp(14px, 4vh, 20px); }
+  .stat .k { font-size: 10px; letter-spacing: .5px; }
+  #next-miles { font-size: 60%; }
+  #pb { height: 14px; margin: 18px 14px 4px; border-width: 2px; }
+  #pb::after { inset: 4px 5px; border-top-width: 2px; }
+  .pb-mark { font-size: 14px; top: -20px; }
+  #pb-truck { font-size: 20px; top: -14px; }
+  #pb-text { font-size: 11px; gap: 6px; }
+  .pb-mid { display: none; }
+}
+
+/* ---------- narrow phones in portrait ---------- */
+@media (orientation: portrait) and (max-width: 520px) {
+  #app { padding: 8px 8px 10px; gap: 8px; }
+  header { gap: 6px; }
+  header h1 { font-size: 20px; }
+  #greeting { display: none; }
+  #clock { font-size: 15px; padding: 2px 10px; border-width: 2px; }
+  #dash, .card { min-width: 0; }
+  .card { padding: 10px 14px; border-radius: 16px; border-width: 3px; }
+  #where { padding: 14px 16px; }
+  #headline { font-size: clamp(20px, 6.5vw, 30px); }
+  #subline { font-size: clamp(14px, 4.2vw, 18px); }
+  #fact { font-size: clamp(12px, 3.6vw, 15px); }
+  #stats { grid-template-columns: 0.8fr 1.4fr 1fr; gap: 4px; padding: 8px 6px; }
+  .stat .v { font-size: clamp(15px, 4.6vw, 22px); }
+  .stat .k { font-size: 9px; letter-spacing: .5px; }
+  #pb { height: 14px; margin: 18px 12px 4px; border-width: 2px; }
+  #pb::after { inset: 4px 5px; border-top-width: 2px; }
+  .pb-mark { font-size: 14px; top: -20px; }
+  #pb-truck { font-size: 20px; top: -14px; }
+  #pb-text { font-size: 11px; white-space: normal; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
+  .pb-mid { width: 100%; text-align: center; order: 3; }
+}
