@@ -36,6 +36,10 @@ Nothing to edit on the server: the site creates its own secret on first visit.
 That page is only ever shown once without the secret. To see it again use
 `https://bambamgo.com/api/setup.php?token=YOUR-SECRET`.
 
+**Reset the secret:** with the old one, open `…/api/admin.php?token=OLD&action=rotate`.
+Without it, change the text in `api/reset-secret.txt`, push, wait for the deploy, and open
+`…/api/setup.php` once: it shows a brand-new secret. Update OwnTracks afterwards.
+
 `data/` (live positions) and `api/config.php` (the secret) are git-ignored and blocked
 from the web, so redeploys never wipe the trip or the secret.
 

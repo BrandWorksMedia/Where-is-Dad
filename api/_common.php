@@ -50,6 +50,25 @@ function recent_attempts(int $n = 10): array {
     return array_reverse($out);
 }
 
+define('RESET_MARKER', __DIR__ . '/reset-secret.txt');
+
+// Write api/config.php with a fresh secret. $resetId ties the secret to the
+// current reset marker so a deploy with a new marker triggers exactly one reset.
+function write_new_secret(?string $resetId = null): string {
+    $token = bin2hex(random_bytes(16));
+    $php = "<?php\n// Created by setup.php on " . date('c') . "\nreturn [\n"
+         . "    'token' => '" . $token . "',\n"
+         . "    'reset_id' => " . var_export($resetId ?? '', true) . ",\n];\n";
+    if (@file_put_contents(__DIR__ . '/config.php', $php, LOCK_EX) === false) {
+        throw new RuntimeException('cannot write config.php');
+    }
+    return $token;
+}
+
+function current_reset_id(): ?string {
+    return is_file(RESET_MARKER) ? trim((string)@file_get_contents(RESET_MARKER)) : null;
+}
+
 function require_token(array $cfg): void {
     $given = $_GET['token'] ?? '';
     // OwnTracks can also send HTTP basic auth; accept the token as the password too.

@@ -2,6 +2,7 @@
 // ------------------------------------------------------------
 //  Little admin helper (needs the token).
 //  api/admin.php?token=...&action=reset   -> wipe the trail, start fresh
+//  api/admin.php?token=...&action=rotate  -> make a new secret (old one stops working)
 //  api/admin.php?token=...&action=status  -> show what the server has
 //  api/admin.php?token=...&action=fake&lat=30.43&lon=-84.28&vel=100
 //                                          -> pretend the truck is somewhere (for testing)
@@ -13,6 +14,13 @@ require_token($cfg);
 ensure_data_dir();
 
 $action = $_GET['action'] ?? 'status';
+
+if ($action === 'rotate') {
+    $new = write_new_secret(current_reset_id());
+    $base = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'bambamgo.com');
+    json_out(['ok' => true, 'message' => 'New secret created. Update OwnTracks with the new URL.',
+        'setup_page' => "$base/api/setup.php?token=$new"]);
+}
 
 if ($action === 'reset') {
     @unlink(LATEST_FILE);

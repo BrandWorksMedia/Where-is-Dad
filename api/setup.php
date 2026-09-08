@@ -18,11 +18,19 @@ $token = null;
 $state = 'new';
 
 $existing = null;
+$storedResetId = '';
 if (is_file($configFile)) {
     $cfg = require $configFile;
     if (is_array($cfg) && !empty($cfg['token']) && $cfg['token'] !== 'CHANGE-ME-to-a-long-random-secret') {
         $existing = (string)$cfg['token'];
+        $storedResetId = (string)($cfg['reset_id'] ?? '');
     }
+}
+
+// A new api/reset-secret.txt (pushed through GitHub) forces one fresh secret.
+$resetId = current_reset_id();
+if ($existing !== null && $resetId !== null && $resetId !== '' && $resetId !== $storedResetId) {
+    $existing = null;   // treat as first visit: make a new secret below
 }
 
 if ($existing !== null) {
@@ -34,11 +42,11 @@ if ($existing !== null) {
         $state = 'locked';
     }
 } else {
-    // First visit: create the secret.
-    $token = bin2hex(random_bytes(16));
-    $php = "<?php\n// Created by setup.php on " . date('c') . "\nreturn [\n    'token' => '" . $token . "',\n];\n";
-    $ok = @file_put_contents($configFile, $php, LOCK_EX) !== false;
-    if (!$ok) {
+    // First visit (or a reset): create the secret.
+    try {
+        $token = write_new_secret($resetId);
+    } catch (RuntimeException $e) {
+        $token = bin2hex(random_bytes(16));
         $state = 'unwritable';
     }
     ensure_data_dir_quiet();
@@ -93,7 +101,7 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   <h1>Already set up ✅</h1>
   <p>The secret was created earlier and is not shown again to strangers.</p>
   <p>Know the secret? Open <code><?= $h($base) ?>/api/setup.php?token=YOUR-SECRET</code> to see this page again.</p>
-  <p>Lost it? Delete <code>api/config.php</code> with hPanel's File Manager and reload this page to make a new one (then update OwnTracks).</p>
+  <p>Lost it? Change the text inside <code>api/reset-secret.txt</code> in the GitHub repo and push. After Hostinger deploys, the next visit here shows a brand-new secret.</p>
   <p><a class="btn blue" href="<?= $h($base) ?>/">Open the map</a></p>
 </div>
 

@@ -1,4 +1,4 @@
 # Never serve the example/config files as text
-<FilesMatch "^(config\.php|config\.example\.php|_common\.php)$">
+<FilesMatch "^(config\.php|config\.example\.php|_common\.php|reset-secret\.txt)$">
   Require all denied
 </FilesMatch>
