@@ -16,6 +16,7 @@
   --orange: #ffb347;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
 body {
   font-family: "Fredoka", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif;
@@ -54,28 +55,32 @@ header h1 span { color: var(--red); }
                     radial-gradient(circle at 45% 85%, rgba(255,255,255,.3) 0 5px, transparent 6px);
   background-size: 260px 200px, 340px 260px, 300px 220px;
 }
-#map { width: 100%; height: 100%; display: block; }
+#map { width: 100%; height: 100%; display: block; --kz: 1; }   /* --kz shrinks labels/strokes while zoomed in */
 
 /* ---------- map art ---------- */
-.state { stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
-.state-name { font-weight: 700; font-size: 26px; fill: rgba(45,42,50,.55); text-anchor: middle; letter-spacing: 3px; }
-.lake { fill: var(--water); stroke: var(--ink); stroke-width: 3; }
-.sea-name { font-weight: 700; fill: rgba(255,255,255,.85); text-anchor: middle; letter-spacing: 4px; }
-.road-edge { fill: none; stroke: var(--ink); stroke-width: 16; stroke-linejoin: round; stroke-linecap: round; }
-.road { fill: none; stroke: var(--road); stroke-width: 11; stroke-linejoin: round; stroke-linecap: round; }
-.road-dash { fill: none; stroke: var(--yellow); stroke-width: 2.5; stroke-dasharray: 10 12; stroke-linejoin: round; }
-.trail { fill: none; stroke: var(--orange); stroke-width: 5; stroke-dasharray: 1 10; stroke-linecap: round; opacity: .9; }
+.state { stroke: var(--ink); stroke-width: calc(4px / var(--kz)); stroke-linejoin: round; cursor: pointer; transition: opacity .5s; }
+.state.dim { opacity: .55; }
+.state-name { font-weight: 700; font-size: calc(var(--fs) / var(--kz)); fill: rgba(45,42,50,.55); text-anchor: middle; letter-spacing: 3px; pointer-events: none; }
+.lake { fill: var(--water); stroke: var(--ink); stroke-width: calc(3px / var(--kz)); pointer-events: none; }
+.sea-name { font-weight: 700; font-size: calc(var(--fs) / var(--kz)); fill: rgba(255,255,255,.85); text-anchor: middle; letter-spacing: 4px; pointer-events: none; }
+.road-edge { fill: none; stroke: var(--ink); stroke-width: calc(16px / var(--kz)); stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
+.road { fill: none; stroke: var(--road); stroke-width: calc(11px / var(--kz)); stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
+.road-dash { fill: none; stroke: var(--yellow); stroke-width: calc(2.5px / var(--kz)); stroke-dasharray: 10 12; stroke-linejoin: round; pointer-events: none; }
+.trail { fill: none; stroke: var(--orange); stroke-width: calc(5px / var(--kz)); stroke-dasharray: 1 10; stroke-linecap: round; opacity: .9; pointer-events: none; }
+.landmark { pointer-events: none; }
+.landmark .pin { r: calc(var(--r) / var(--kz)); }
+.lm-emoji, .lm-name { font-size: calc(var(--fs) / var(--kz)); }
 
-.landmark .pin { fill: var(--red); stroke: var(--ink); stroke-width: 3; }
+.landmark .pin { fill: var(--red); stroke: var(--ink); stroke-width: calc(3px / var(--kz)); }
 .landmark.minor .pin { fill: #fff; }
-.landmark .lm-name { font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+.landmark .lm-name { font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: calc(6px / var(--kz)); stroke-linejoin: round; }
 .landmark.minor .lm-name { font-weight: 600; fill: #4a4657; }
 .landmark.minor .lm-emoji { opacity: .95; }
 .landmark.active .pin { fill: var(--yellow); animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .landmark.active .lm-emoji { animation: hop .9s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 .landmark.active .lm-name { fill: #c0392b; }
 
-.doodle { pointer-events: none; }
+.doodle { pointer-events: none; font-size: calc(var(--fs) / var(--kz)); }
 .doodle.bob { animation: bob 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .doodle.bob.slow { animation-duration: 5s; }
 .doodle.sun { animation: spin 40s linear infinite; transform-box: fill-box; transform-origin: center; }
@@ -85,6 +90,17 @@ header h1 span { color: var(--red); }
 
 /* ---------- truck ---------- */
 .truck-pos { transition: transform 3s linear; }
+.truck .tap-target { pointer-events: all; cursor: pointer; }
+.truck-hop { transform-box: fill-box; transform-origin: 50% 100%; }
+.truck-hop.hop { animation: truckHop .75s cubic-bezier(.25,1.5,.5,1) both; }
+@keyframes truckHop {
+  0%   { transform: translateY(0) scale(1, 1); }
+  15%  { transform: translateY(0) scale(1.15, .8); }
+  45%  { transform: translateY(-48px) scale(.92, 1.12); }
+  70%  { transform: translateY(0) scale(1.08, .9); }
+  85%  { transform: translateY(-8px) scale(1, 1); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
 .truck .paint { fill: #ffffff; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
 .truck .shadow { fill: rgba(0,0,0,.18); }
 .truck .puff { fill: rgba(255,255,255,.85); stroke: rgba(45,42,50,.35); stroke-width: 2; opacity: 0; }
@@ -168,10 +184,29 @@ body.fullmap #map-wrap {
 }
 body.fullmap #offline, body.fullmap #demo-badge { top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); }
 body.fullmap .map-btn { left: max(14px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom)); }
+body.fullmap .pill-btn { right: max(16px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); }
+body.fullmap #state-pill { bottom: max(16px, env(safe-area-inset-bottom)); }
+
+/* ---------- state close-up ---------- */
+.pill-btn {
+  position: absolute; right: 16px; top: 12px; z-index: 6;
+  background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 999px;
+  padding: 8px 16px; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,.15); -webkit-tap-highlight-color: transparent;
+}
+#state-pill {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6;
+  max-width: min(92%, 760px); background: var(--paper); border: 4px solid var(--ink); border-radius: 22px;
+  padding: 10px 18px; font-size: clamp(14px, 1.9vw, 22px); font-weight: 600; text-align: center;
+  box-shadow: 0 6px 0 rgba(0,0,0,.15); animation: bannerIn .5s cubic-bezier(.2,1.4,.4,1) both;
+}
+#state-pill b { font-size: 115%; }
+#state-pill b::after { content: " · "; font-weight: 400; color: #5a5566; }
+#sp-emoji { font-size: 130%; }
 
 /* ---------- state-line banner + sound pill ---------- */
 #sound-pill {
-  position: absolute; right: 16px; top: 12px; z-index: 6;
+  position: absolute; right: 16px; bottom: 16px; z-index: 6;
   background: var(--paper); border: 3px solid var(--ink); border-radius: 999px;
   padding: 4px 12px; font-weight: 700; font-size: 15px; animation: wiggle 2s ease-in-out infinite;
 }
@@ -248,6 +283,7 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
 
 /* ---------- narrow phones in portrait ---------- */
 @media (orientation: portrait) and (max-width: 520px) {
+  #state-pill { display: none !important; }   /* the map is too small for it here */
   #app { padding: 8px 8px 10px; gap: 8px; }
   header { gap: 6px; }
   header h1 { font-size: 20px; }

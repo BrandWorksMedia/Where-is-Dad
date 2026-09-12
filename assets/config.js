@@ -24,6 +24,20 @@ window.TRIP = {
   hornOnStateLines: true,
   // Extra long honk when Dad arrives
   hornOnArrival: true,
+  // A short toot when the truck is tapped (it always bounces)
+  beepOnTruckTap: true,
+
+  // One line shown when a state is tapped for a close-up
+  stateFacts: {
+    FL: { emoji: "🐊", text: "The Sunshine State: home, gators, beaches and the start of the trip!" },
+    AL: { emoji: "🚢", text: "A giant battleship, a tunnel under the river, and sweet tea." },
+    MS: { emoji: "🦐", text: "Shrimp boats, long sandy beaches and the mighty Mississippi River." },
+    LA: { emoji: "🎺", text: "Jazz, gumbo, gators and an 18-mile bridge over a swamp." },
+    TX: { emoji: "🤠", text: "Everything is bigger here, and Tomball is the finish line!" },
+    GA: { emoji: "🍑", text: "Dad doesn't drive through here, but the peaches say hi!" }
+  },
+  // Close-up returns to the whole trip by itself after this many seconds
+  zoomBackSeconds: 90,
 
   // Landmarks along the route, in driving order.  Miami first, Tomball last.
   // The road on the map is drawn through these points, so keep them in order.

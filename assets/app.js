@@ -89,6 +89,7 @@
   // ---------------- state ----------------
   let last = null;        // last location object from server
   let facing = -1;        // -1 = west (left), 1 = east (right)
+  let truckScale = 1;     // shrinks the truck while zoomed into a state
   let failures = 0;
   let arrivedShown = false;
 
@@ -96,9 +97,14 @@
     const p = M.proj(lon, lat);
     truckPos.setAttribute("transform", `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
     if (typeof cog === "number" && moving) facing = (cog > 180 || cog < 0) ? -1 : (cog < 180 && cog > 0 ? 1 : facing);
-    // truck art faces west (left). heading 0..180 = eastward -> flip
-    truck.setAttribute("transform", `scale(${facing === 1 ? -0.85 : 0.85},0.85)`);
+    refreshTruckTransform();
     truck.classList.toggle("moving", !!moving);
+  }
+
+  // truck art faces west (left). heading 0..180 = eastward -> flip
+  function refreshTruckTransform() {
+    const s = 0.85 * truckScale;
+    truck.setAttribute("transform", `scale(${facing === 1 ? -s : s},${s})`);
   }
 
   function setHeadline(big, small, fact) {
@@ -236,6 +242,7 @@
     }
     return {
       beepBeep: () => play([[0.18, 0.12], [0.28, 0]]),
+      toot:     () => play([[0.12, 0]]),
       arrival:  () => play([[0.15, 0.1], [0.15, 0.1], [0.15, 0.1], [0.9, 0]])
     };
   })();
@@ -266,6 +273,7 @@
       known = st.id; candidate = null; candidateHits = 0;
       try { localStorage.setItem("lastState", known); } catch (e) {}
       show(st); horn.beepBeep();
+      if (typeof zoom !== "undefined") zoom.out();   // back to the whole trip for the new state
     };
   })();
 
@@ -351,6 +359,90 @@
       apply();
     });
     apply();
+  })();
+
+  // ---------------- tap a state for a close-up ----------------
+  const zoom = (function () {
+    const svg = mapEl;
+    const full = [0, 0, M.W, M.H];
+    let cur = full.slice(), raf = null, active = null, backTimer = null;
+    const backBtn = $("zoom-back"), pill = $("state-pill");
+
+    function apply(v) {
+      cur = v;
+      svg.setAttribute("viewBox", v.map(n => n.toFixed(1)).join(" "));
+      const k = Math.pow(M.W / v[2], 0.6);           // soften: labels shrink, but not all the way
+      svg.style.setProperty("--kz", k.toFixed(3));
+      truckScale = 1 / k;
+      refreshTruckTransform();
+    }
+    function animateTo(target) {
+      const from = cur.slice(), t0 = performance.now();
+      cancelAnimationFrame(raf);
+      const step = (now) => {
+        let p = Math.min(1, (now - t0) / 650);
+        p = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+        apply(from.map((a, i) => a + (target[i] - a) * p));
+        if (p < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+    function fit(b) {
+      const pad = 0.12;
+      let w = b.w * (1 + 2 * pad), h = b.h * (1 + 2 * pad);
+      const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      const r = svg.getBoundingClientRect();
+      const ar = r.width / Math.max(1, r.height);
+      if (w / h < ar) w = h * ar; else h = w / ar;
+      const minW = M.W / 3.2;                              // cap the zoom so small states still show neighbours
+      if (w < minW) { h *= minW / w; w = minW; }
+      if (w > M.W) { h *= M.W / w; w = M.W; }            // never zoom out past the whole map
+      if (h > M.H) { w *= M.H / h; h = M.H; }
+      return [cx - w / 2, cy - h / 2, w, h];
+    }
+    function to(id) {
+      const b = M.stateBounds(id);
+      if (!b) return;
+      active = id;
+      animateTo(fit(b));
+      const f = (T.stateFacts || {})[id] || {};
+      $("sp-emoji").textContent = f.emoji || "";
+      $("sp-name").textContent = b.name.charAt(0) + b.name.slice(1).toLowerCase();
+      $("sp-text").textContent = f.text || "";
+      pill.style.background = b.fill;
+      pill.hidden = false; backBtn.hidden = false;
+      document.querySelectorAll(".state").forEach(e => e.classList.toggle("dim", e.dataset.state !== id));
+      clearTimeout(backTimer);
+      backTimer = setTimeout(out, (T.zoomBackSeconds || 90) * 1000);
+    }
+    function out() {
+      if (!active) return;
+      active = null;
+      animateTo(full.slice());
+      pill.hidden = true; backBtn.hidden = true;
+      document.querySelectorAll(".state.dim").forEach(e => e.classList.remove("dim"));
+      clearTimeout(backTimer);
+    }
+    svg.addEventListener("click", (e) => {
+      const st = e.target.closest && e.target.closest(".state");
+      if (st) { const id = st.dataset.state; if (active === id) out(); else to(id); }
+      else if (active) out();                          // tap the water to go back
+    });
+    backBtn.addEventListener("click", out);
+    window.addEventListener("resize", () => { if (active) animateTo(fit(M.stateBounds(active))); });
+    return { to, out, get active() { return active; } };
+  })();
+
+  // ---------------- tap the truck: it bounces ----------------
+  (function () {
+    const hopEl = truckPos.querySelector(".truck-hop");
+    truck.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hopEl.classList.remove("hop");
+      void hopEl.getBoundingClientRect();              // restart the animation
+      hopEl.classList.add("hop");
+      if (T.beepOnTruckTap) horn.toot();
+    });
   })();
 
   // ---------------- clock + housekeeping ----------------
