@@ -124,6 +124,12 @@ name, polling speed, and the list of landmarks (name, state, lat/lon, emoji,
 fun fact, big or small, where the label goes). Keep landmarks in driving order:
 the road is drawn through them and progress is measured along that line.
 
+The road is symbolic: straight lines between the points. Entries marked
+`waypoint: true` are invisible bends that make the line follow the real highway.
+The truck is drawn **on** the road whenever the phone is within `snapMiles` (30) of
+it, and at its true position beyond that, so a real detour still looks like one.
+If you take a different road, just change the landmarks and waypoints.
+
 Map shapes and the truck drawing are in `assets/map.js`; colours and
 animations in `assets/style.css`; the logic in `assets/app.js`.
 

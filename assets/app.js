@@ -37,13 +37,14 @@
       t = Math.max(0, Math.min(1, t));
       const cx = ax + t * dx, cy = ay + t * dy;
       const off = Math.sqrt(cx * cx + cy * cy) * 69.0;   // degrees -> miles
-      if (off < best.off) best = { miles: cum[i] + t * (cum[i + 1] - cum[i]), off, seg: i };
+      if (off < best.off) best = { miles: cum[i] + t * (cum[i + 1] - cum[i]), off, seg: i,
+        snap: { lat: p.lat + cy, lon: p.lon + cx / cosLat } };   // nearest point ON the road
     }
     return best;
   }
   function nearest(p) {
     let bi = 0, bd = Infinity;
-    L.forEach((l, i) => { const d = haversine(p, l); if (d < bd) { bd = d; bi = i; } });
+    L.forEach((l, i) => { if (l.waypoint) return; const d = haversine(p, l); if (d < bd) { bd = d; bi = i; } });
     return { i: bi, d: bd };
   }
   const mi = (n) => Math.round(n).toLocaleString();
@@ -77,7 +78,7 @@
   // progress bar landmarks
   const pb = $("pb-marks");
   L.forEach((l, i) => {
-    if (l.minor) return;
+    if (l.minor || l.waypoint) return;
     const d = document.createElement("div");
     d.className = "pb-mark";
     d.style.left = (cum[i] / TOTAL * 100) + "%";
@@ -133,7 +134,9 @@
     const finish = L[L.length - 1];
     const toFinish = haversine(p, finish);
 
-    placeTruck(loc.lat, loc.lon, loc.cog, moving);
+    // Draw the truck on the road when it is close to it; the cards keep the true numbers.
+    const drawAt = (ar.off <= (T.snapMiles || 0) && ar.snap) ? ar.snap : p;
+    placeTruck(drawAt.lat, drawAt.lon, loc.cog, moving);
     stateWatch(loc.lat, loc.lon, stale);
     document.body.classList.toggle("stale", stale);
     document.body.classList.toggle("moving", moving);
@@ -152,9 +155,10 @@
     setStat("eta", toFinish < T.arriveMiles ? "He's here!" : hoursText(left / avg));
 
     // next stop = first landmark ahead on the route
-    let nextI = L.findIndex((l, i) => cum[i] > done + 5);
+    let nextI = L.findIndex((l, i) => !l.waypoint && cum[i] > done + 5);
     if (nextI < 0) nextI = L.length - 1;
-    const prevI = Math.max(0, nextI - 1);
+    let prevI = nextI - 1;
+    while (prevI > 0 && L[prevI].waypoint) prevI--;
     const next = L[nextI];
     const arrived = toFinish < T.arriveMiles;
     setStat("next-name", next.emoji + " " + next.name);
@@ -192,13 +196,18 @@
     $("pb-truck").style.left = "0%";
     setStat("miles-done", "0"); setStat("miles-left", mi(TOTAL));
     setStat("speed", "0"); setStat("updated", "waiting…"); setStat("battery", "–");
-    setStat("eta", hoursText(TOTAL / 60)); setStat("next-name", L[1].emoji + " " + L[1].name);
-    setStat("next-miles", mi(haversine(L[0], L[1])) + " miles away");
+    const first = L.find((l, i) => i > 0 && !l.waypoint) || L[1];
+    setStat("eta", hoursText(TOTAL / 60)); setStat("next-name", first.emoji + " " + first.name);
+    setStat("next-miles", mi(haversine(L[0], first)) + " miles away");
   }
 
   function drawTrail(points) {
     if (!points || !points.length) return;
-    trailEl.setAttribute("points", points.map(q => { const p = M.proj(q.lon, q.lat); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" "));
+    trailEl.setAttribute("points", points.map(q => {
+      const a = alongRoute(q);
+      const s = (a.off <= (T.snapMiles || 0) && a.snap) ? a.snap : q;   // trail rides the road too
+      const p = M.proj(s.lon, s.lat); return p.x.toFixed(1) + "," + p.y.toFixed(1);
+    }).join(" "));
   }
 
   // ---------------- horn (Web Audio, no sound files) ----------------
@@ -453,6 +462,7 @@
   tickClock(); setInterval(tickClock, 10000);
   setTimeout(() => location.reload(), 12 * 3600 * 1000);   // fresh page twice a day
 
+  window.WID = { alongRoute, nearest, cum, TOTAL };   // handy in the console
   $("greeting").textContent = `Hi ${T.kidName}!`;
   $("eta-label").textContent = `left until ${L[L.length - 1].name}`;
   $("driver-name").textContent = T.driverName;

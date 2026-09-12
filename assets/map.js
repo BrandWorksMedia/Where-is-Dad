@@ -178,6 +178,7 @@ window.MAP = (function () {
     for (const d of doodles) s += emojiAt(d.e, d.lon, d.lat, d.size, d.cls);
     // landmarks
     landmarks.forEach((l, i) => {
+      if (l.waypoint) return;                      // bends in the road, not stops
       const p = proj(l.lon, l.lat);
       const big = !l.minor;
       const r = big ? 9 : 5;
