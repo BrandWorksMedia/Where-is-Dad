@@ -3,6 +3,7 @@
 //  Little admin helper (needs the token).
 //  api/admin.php?token=...&action=reset   -> wipe the trail, start fresh
 //  api/admin.php?token=...&action=rotate  -> make a new secret (old one stops working)
+//  api/admin.php?token=...&action=radio-clear -> delete all walkie-talkie clips
 //  api/admin.php?token=...&action=status  -> show what the server has
 //  api/admin.php?token=...&action=fake&lat=30.43&lon=-84.28&vel=100
 //                                          -> pretend the truck is somewhere (for testing)
@@ -22,10 +23,17 @@ if ($action === 'rotate') {
         'setup_page' => "$base/api/setup.php?token=$new"]);
 }
 
+if ($action === 'radio-clear') {
+    $n = 0;
+    foreach (glob(DATA_DIR . '/radio/*') ?: [] as $f) { if (@unlink($f)) $n++; }
+    json_out(['ok' => true, 'deleted' => $n]);
+}
+
 if ($action === 'reset') {
     @unlink(LATEST_FILE);
     @unlink(HISTORY_FILE);
     @unlink(ATTEMPT_LOG);
+    foreach (glob(DATA_DIR . '/radio/*') ?: [] as $f) @unlink($f);   // radio clips too
     json_out(['ok' => true, 'message' => 'Trail cleared. The map is back to "Dad hasn\'t left yet".']);
 }
 
@@ -50,6 +58,7 @@ json_out([
     'latest' => read_latest(),
     'history_points' => $lines,
     'recent_attempts' => recent_attempts(10),
+    'radio_clips' => max(0, count(glob(DATA_DIR . '/radio/*') ?: []) - (is_file(DATA_DIR . '/radio/messages.jsonl') ? 1 : 0)),
     'server_time' => time(),
     'data_dir_writable' => is_writable(DATA_DIR),
     'php' => PHP_VERSION,

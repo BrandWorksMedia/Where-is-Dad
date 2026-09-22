@@ -117,7 +117,19 @@ An orange dotted trail shows everywhere the truck has been.
 
 ---
 
-## 5. Change names, landmarks, facts
+## 5. The walkie-talkie 📻
+
+A playful push-to-talk radio, voice clips only, **open to anyone with the link on purpose**.
+
+- **Kid:** the yellow walkie-talkie card on the map. Hold the red button, talk (up to 20 s), let go to send.
+- **Dad:** `https://bambamgo.com/radio/` on the mounted iPhone. Keep it open; new messages play out loud
+  with a "kssht" and an "over" beep. One tap records 10 s and sends by itself.
+- Clips are stored in `data/radio/` (web-blocked), newest 40 kept, 3 MB max each, served only
+  through `api/radio.php`. Delete them with `…/api/admin.php?token=…&action=radio-clear`.
+- iOS tip: Settings → Safari → Microphone → Allow for bambamgo.com, so it stops asking.
+- In big-map mode the walkie-talkie shrinks to a floating red button in the bottom-right corner.
+
+## 6. Change names, landmarks, facts
 
 Everything editable is in **`assets/config.js`**: the kid's name, the driver's
 name, polling speed, and the list of landmarks (name, state, lat/lon, emoji,
@@ -150,6 +162,9 @@ api/owntracks.php        receives OwnTracks posts  (POST, token required)
 api/location.php         latest position + trail for the iPad  (GET, public)
 api/admin.php            status / reset / fake position  (token required)
 api/setup.php            one-time page: creates the secret, shows the OwnTracks URL + one-tap config
+api/radio.php            walkie-talkie: upload / list / stream voice clips (no token)
+assets/radio.js|css      the walkie-talkie (shared by the map card and /radio/)
+radio/index.html         Dad's full-screen radio
 api/config.example.php   only needed if you set the secret by hand
 deploy/hostinger_deploy.py  zero-touch deploy through the Hostinger API
 data/                    live position files (created by PHP, not in git)

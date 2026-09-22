@@ -116,11 +116,18 @@ body.stale .truck .paint { fill: #eef0f3; }
 #dash {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: 1.45fr 1fr;
+  grid-template-columns: 1.25fr 0.72fr 1fr;
   grid-template-rows: auto auto;
   gap: 10px 14px;
 }
 #progress { grid-column: 1 / -1; }
+#radio.card { padding: 30px 10px 10px; display: flex; align-items: stretch; justify-content: center; background: var(--paper); overflow: visible; }
+#radio .walkie { max-width: 260px; padding-top: 18px; }
+#radio .ptt { width: 112px; height: 112px; font-size: 15px; }
+#radio .grille { width: 56%; }
+#radio .history { display: none; }              /* keep the map card tidy; chips live on /radio/ */
+#radio .antenna { top: -30px; height: 36px; }
+#radio .antenna-tip { top: -38px; }
 .card {
   background: var(--paper);
   border: 4px solid var(--ink);
@@ -178,6 +185,21 @@ body.fullmap .map-btn { background: var(--yellow); }
 
 body.fullmap #app { display: block; padding: 0; gap: 0; height: 100vh; height: 100dvh; }
 body.fullmap header, body.fullmap #dash { display: none; }
+/* in big-map mode the walkie-talkie shrinks to a floating button, bottom-right */
+body.fullmap #dash { display: contents; }
+body.fullmap #where, body.fullmap #stats, body.fullmap #progress { display: none; }
+body.fullmap #radio.card {
+  position: fixed; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); z-index: 6;
+  padding: 0; border: 0; box-shadow: none; background: transparent; width: auto;
+}
+body.fullmap #radio .walkie { background: transparent; border: 0; box-shadow: none; padding: 0; gap: 0; width: auto; }
+body.fullmap #radio .walkie::before, body.fullmap #radio .antenna, body.fullmap #radio .antenna-tip,
+body.fullmap #radio .grille, body.fullmap #radio .history { display: none; }
+body.fullmap #radio .w-top { position: absolute; right: -4px; top: -4px; width: auto; }
+body.fullmap #radio .screen { position: absolute; right: 0; bottom: 100%; margin-bottom: 10px; width: 220px; display: none; }
+body.fullmap #radio .walkie.is-recording .screen, body.fullmap #radio .walkie.is-receiving .screen,
+body.fullmap #radio .walkie.is-sending .screen, body.fullmap #radio .walkie.is-error .screen { display: block; }
+body.fullmap #radio .ptt { width: 96px; height: 96px; font-size: 13px; }
 body.fullmap #map-wrap {
   width: 100%; height: 100%; min-height: 0; flex: none; aspect-ratio: auto;
   border: 0; border-radius: 0; box-shadow: none;
@@ -244,7 +266,10 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
 /* ---------- portrait iPad ---------- */
 @media (orientation: portrait) {
   #map-wrap { flex: 0 0 auto; aspect-ratio: 1560 / 730; }
-  #dash { flex: 1 1 auto; min-height: 0; grid-template-columns: 1fr; grid-template-rows: 1fr auto auto; }
+  #dash { flex: 1 1 auto; min-height: 0; grid-template-columns: 1fr; grid-template-rows: 1fr auto auto auto; }
+  #radio.card { padding: 22px 14px 12px; }
+  #radio .walkie { max-width: none; }
+  #radio .history { display: flex; }
   #where { padding: 20px 24px; }
   #headline { font-size: clamp(28px, 6.5vw, 64px); }
   #subline { font-size: clamp(18px, 3vw, 30px); }
@@ -262,8 +287,13 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
   #greeting { font-size: 15px; }
   #clock { font-size: 17px; padding: 2px 10px; border-width: 2px; }
   #map-wrap { min-height: 0; border-radius: 18px; border-width: 3px; }
-  #dash { display: grid; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; min-height: 0; }
+  #dash { display: grid; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto auto auto; gap: 6px; min-height: 0; }
   #progress { grid-column: auto; }
+  #radio.card { padding: 6px 8px; }
+  #radio .walkie { padding: 8px 10px; gap: 4px 10px; }
+  #radio .ptt { width: 64px; height: 64px; font-size: 10px; }
+  #radio .screen { padding: 4px 8px; } #radio .scr-status { font-size: 12px; } #radio .scr-wave { display: none; }
+  #radio .antenna, #radio .antenna-tip { display: none; }
   .card { padding: 6px 12px; border-radius: 14px; border-width: 3px; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
   #where { overflow: hidden; }
   #headline { font-size: clamp(17px, 5.2vh, 30px); }
@@ -291,6 +321,8 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
   #clock { font-size: 15px; padding: 2px 10px; border-width: 2px; }
   #dash, .card { min-width: 0; }
   .card { padding: 10px 14px; border-radius: 16px; border-width: 3px; }
+  #radio.card { padding: 18px 10px 10px; }
+  #radio .ptt { width: 84px; height: 84px; font-size: 12px; }
   #where { padding: 14px 16px; }
   #headline { font-size: clamp(20px, 6.5vw, 30px); }
   #subline { font-size: clamp(14px, 4.2vw, 18px); }
@@ -304,4 +336,58 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
   #pb-truck { font-size: 20px; top: -14px; }
   #pb-text { font-size: 11px; white-space: normal; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
   .pb-mid { width: 100%; text-align: center; order: 3; }
+}
+
+/* the map card's walkie-talkie goes horizontal on portrait and short screens */
+@media (orientation: portrait), (orientation: landscape) and (max-height: 640px) {
+  #radio .walkie { flex-direction: row; flex-wrap: wrap; max-width: none; padding: 14px 14px 12px 18px; gap: 8px 14px; border-radius: 28px; }
+  #radio .w-top { width: auto; flex: 0 0 auto; order: 1; }
+  #radio .grille { width: 70px; }
+  #radio .screen { flex: 1 1 140px; order: 2; }
+  #radio .ptt { order: 3; }
+  #radio .history { order: 4; width: 100%; }
+}
+
+/* short landscape: the radio card must stay small so the headline card keeps its room */
+@media (orientation: landscape) and (max-height: 640px) {
+  #dash { grid-template-rows: minmax(0, 1fr) auto auto auto; }
+  #radio.card { padding: 4px 8px; }
+  #radio .walkie { padding: 6px 10px 6px 14px; gap: 4px 10px; border-radius: 18px; align-items: center; }
+  #radio .grille { width: 46px; gap: 3px; }
+  #radio .led { width: 12px; height: 12px; border-width: 2px; }
+  #radio .screen { padding: 3px 8px; border-width: 2px; }
+  #radio .scr-chan { display: none; }
+  #radio .scr-status { font-size: 12px; min-height: 1.2em; }
+  #radio .scr-wave { display: none; }
+  #radio .ptt { width: 58px; height: 58px; font-size: 9px; border-width: 3px; box-shadow: 0 4px 0 rgba(0,0,0,.25), inset 0 -4px 0 rgba(0,0,0,.15); }
+  #radio .ptt-timer { bottom: 4px; font-size: 9px; }
+  #radio .history { display: none; }
+  #radio .antenna, #radio .antenna-tip, #radio .walkie::before { display: none; }
+}
+
+/* narrow portrait phones: one-row walkie-talkie */
+@media (orientation: portrait) and (max-width: 520px) {
+  #radio.card { padding: 6px 8px; }
+  #radio .walkie { flex-wrap: nowrap; padding: 8px 10px 8px 14px; gap: 10px; border-radius: 20px; align-items: center; }
+  #radio .grille, #radio .history, #radio .antenna, #radio .antenna-tip, #radio .walkie::before, #radio .scr-wave { display: none; }
+  #radio .w-top { order: 3; }
+  #radio .screen { order: 1; padding: 6px 8px; }
+  #radio .scr-chan { display: none; }
+  #radio .scr-status { font-size: 13px; }
+  #radio .ptt { order: 2; width: 72px; height: 72px; font-size: 10px; flex: 0 0 auto; }
+}
+
+/* short landscape (phone sideways): the radio floats over the map like in big-map mode */
+@media (orientation: landscape) and (max-height: 640px) {
+  #dash { grid-template-rows: minmax(0, 1fr) auto auto; }
+  #radio.card {                       /* floats over the map's bottom-right corner (the map is the left 60%) */
+    position: fixed; right: calc(40% + 26px); bottom: 26px; z-index: 6;
+    padding: 0; border: 0; box-shadow: none; background: transparent; width: auto;
+  }
+  #radio .walkie { background: transparent; border: 0; box-shadow: none; padding: 0; gap: 0; width: auto; flex-wrap: nowrap; }
+  #radio .walkie::before, #radio .antenna, #radio .antenna-tip, #radio .grille, #radio .history { display: none; }
+  #radio .w-top { position: absolute; right: -4px; top: -4px; width: auto; }
+  #radio .screen { position: absolute; right: 0; bottom: 100%; margin-bottom: 8px; width: 200px; display: none; }
+  #radio .walkie.is-recording .screen, #radio .walkie.is-receiving .screen, #radio .walkie.is-sending .screen, #radio .walkie.is-error .screen { display: block; }
+  #radio .ptt { width: 74px; height: 74px; font-size: 11px; }
 }

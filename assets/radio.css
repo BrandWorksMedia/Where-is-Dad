@@ -1,0 +1,95 @@
+/* ============================================================
+   Where is Dad?  —  the chubby walkie-talkie
+   Used by the #radio card on the map and by /radio/ (Dad's page).
+   ============================================================ */
+.walkie-root { display: flex; align-items: stretch; justify-content: center; min-width: 0; }
+.walkie {
+  --body: var(--yellow, #ffd93d);
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: 100%; max-width: 300px;
+  background: var(--body);
+  border: 4px solid var(--ink, #2d2a32);
+  border-radius: 34px 34px 40px 40px;
+  padding: 26px 16px 14px;
+  box-shadow: inset 0 -10px 0 rgba(0,0,0,.10), 0 6px 0 rgba(0,0,0,.14);
+  font-family: inherit;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.walkie::before {                                   /* side grip stripes */
+  content: ""; position: absolute; left: 6px; top: 34%; width: 8px; height: 30%;
+  border-left: 4px dotted rgba(0,0,0,.18);
+}
+.antenna { position: absolute; top: -34px; left: 26px; width: 14px; height: 40px; background: var(--ink, #2d2a32); border-radius: 7px 7px 2px 2px; }
+.antenna-tip { position: absolute; top: -42px; left: 22px; width: 22px; height: 14px; background: var(--red, #ff6b6b); border: 3px solid var(--ink, #2d2a32); border-radius: 50%; }
+
+.w-top { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.grille { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; width: 60%; }
+.grille i { display: block; aspect-ratio: 1; border-radius: 50%; background: var(--ink, #2d2a32); opacity: .8; }
+.led { width: 18px; height: 18px; border-radius: 50%; background: #7bd88f; border: 3px solid var(--ink, #2d2a32); box-shadow: 0 0 0 3px rgba(255,255,255,.35); transition: background .2s; }
+.is-receiving .led { background: #ff5a5a; animation: ledBlink .5s steps(2) infinite; }
+.is-recording .led { background: #ff5a5a; }
+.is-sending .led { background: var(--orange, #ffb347); }
+.is-error .led { background: #999; }
+
+.screen {
+  width: 100%; background: #1f2a1f; color: #d9ffd9; border: 3px solid var(--ink, #2d2a32); border-radius: 12px;
+  padding: 8px 10px; text-align: center; box-shadow: inset 0 0 0 2px rgba(255,255,255,.06);
+  font-family: ui-monospace, Menlo, monospace;
+}
+.scr-chan { font-size: 10px; letter-spacing: 1px; opacity: .7; }
+.scr-status { font-size: 15px; font-weight: 700; margin-top: 2px; min-height: 1.3em; font-family: inherit; }
+.scr-wave { display: flex; justify-content: center; gap: 3px; height: 14px; margin-top: 4px; align-items: flex-end; opacity: .35; }
+.scr-wave b { width: 5px; height: 4px; background: #9dffb0; border-radius: 2px; }
+.is-receiving .scr-wave, .is-recording .scr-wave { opacity: 1; }
+.is-receiving .scr-wave b, .is-recording .scr-wave b { animation: wave .7s ease-in-out infinite; }
+.scr-wave b:nth-child(2n) { animation-delay: .12s; } .scr-wave b:nth-child(3n) { animation-delay: .24s; } .scr-wave b:nth-child(5n) { animation-delay: .36s; }
+.is-error .screen { color: #ffd6d6; }
+
+.ptt {
+  --p: 0;
+  position: relative; width: 132px; height: 132px; border-radius: 50%;
+  background: var(--red, #ff6b6b); color: #fff;
+  border: 4px solid var(--ink, #2d2a32);
+  box-shadow: 0 8px 0 rgba(0,0,0,.25), inset 0 -8px 0 rgba(0,0,0,.15);
+  font: inherit; font-weight: 700; font-size: 17px; line-height: 1.1; letter-spacing: .5px;
+  cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.ptt:active, .is-recording .ptt { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,.25), inset 0 -4px 0 rgba(0,0,0,.15); }
+.ptt-ring {
+  position: absolute; inset: -12px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(var(--ink, #2d2a32) calc(var(--p) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+  opacity: 0;
+}
+.is-recording .ptt-ring { opacity: 1; }
+.is-recording .ptt { animation: pttPulse 1s ease-in-out infinite; }
+.is-sending .ptt { background: var(--orange, #ffb347); }
+.ptt-timer { position: absolute; bottom: 14px; font-size: 13px; opacity: .9; }
+
+.history { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 24px; }
+.chip {
+  font: inherit; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  border: 2px solid var(--ink, #2d2a32); background: var(--paper, #fffaf0); color: var(--ink, #2d2a32); cursor: pointer;
+}
+.chip.theirs { background: #dff3ff; }
+.chip small { opacity: .6; font-weight: 500; }
+
+@keyframes ledBlink { to { background: #ffb3b3; } }
+@keyframes wave { 0%,100% { height: 4px; } 50% { height: 14px; } }
+@keyframes pttPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+
+/* ---------- compact (horizontal) variant: portrait phones, short screens ---------- */
+.walkie.compact, .compact .walkie {
+  flex-direction: row; flex-wrap: wrap; max-width: none; padding: 14px 14px 12px 18px; gap: 8px 14px; border-radius: 28px;
+}
+.compact .w-top { width: auto; flex: 0 0 auto; order: 1; }
+.compact .grille { width: 70px; }
+.compact .screen { flex: 1 1 140px; order: 2; }
+.compact .ptt { order: 3; width: 92px; height: 92px; font-size: 13px; }
+.compact .history { order: 4; width: 100%; }
+.compact .antenna { top: -26px; height: 32px; }
+.compact .antenna-tip { top: -34px; }

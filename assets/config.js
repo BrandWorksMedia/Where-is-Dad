@@ -31,6 +31,14 @@ window.TRIP = {
   // A short toot when the truck is tapped (it always bounces)
   beepOnTruckTap: true,
 
+  // The walkie-talkie (open to anyone, on purpose)
+  radio: {
+    kidMaxSeconds: 20,     // hold-to-talk limit on the iPad
+    dadMaxSeconds: 10,     // one tap on Dad's phone records this long, then sends by itself
+    pollSeconds: 3,        // how often each side checks for new messages
+    channel: "CH 4"
+  },
+
   // One line shown when a state is tapped for a close-up
   stateFacts: {
     FL: { emoji: "🐊", text: "The Sunshine State: home, gators, beaches and the start of the trip!" },

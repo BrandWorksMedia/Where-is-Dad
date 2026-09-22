@@ -139,10 +139,17 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 </div>
 
 <div class="card">
+  <h2>3. The walkie-talkie 📻</h2>
+  <p>The map has a yellow walkie-talkie card: hold the red button to talk, let go to send. Dad's side is <a href="<?= $h($base) ?>/radio/"><?= $h($base) ?>/radio/</a>: open it on the mounted iPhone (Add to Home Screen works too) and keep it open. One tap records 10 seconds and sends by itself.</p>
+  <p><small>So iOS stops asking for the microphone every time: Settings → Safari → Microphone → <b>Allow</b> for bambamgo.com, on both devices. The radio is open to anyone with the link, on purpose.</small></p>
+</div>
+
+<div class="card">
   <h2>Handy links (keep this page's address private)</h2>
   <p>This page again: <span class="box"><?= $h($base) ?>/api/setup.php?token=<?= $h($token) ?></span></p>
   <p>Is the phone reporting? <span class="box"><?= $h($base) ?>/api/admin.php?token=<?= $h($token) ?>&amp;action=status</span></p>
   <p>Clear test points before the real trip: <span class="box"><?= $h($base) ?>/api/admin.php?token=<?= $h($token) ?>&amp;action=reset</span></p>
+  <p>Delete radio messages only: <span class="box"><?= $h($base) ?>/api/admin.php?token=<?= $h($token) ?>&amp;action=radio-clear</span></p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

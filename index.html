@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/radio.css">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -45,6 +46,8 @@
         <p id="fact"></p>
       </div>
 
+      <div id="radio" class="card"></div>
+
       <div id="stats" class="card">
         <div class="stat"><div class="v"><span id="speed">–</span><small> mph</small></div><div class="k">Speed</div></div>
         <div class="stat"><div class="v" id="next-name">–</div><div class="k">Next stop <span id="next-miles"></span></div></div>
@@ -69,6 +72,10 @@
 
   <script src="assets/config.js"></script>
   <script src="assets/map.js"></script>
+  <script src="assets/radio.js"></script>
   <script src="assets/app.js"></script>
+  <script>
+    window.RADIO.mount(document.getElementById("radio"), { role: "kid", mode: "hold", api: "api/radio.php" });
+  </script>
 </body>
 </html>

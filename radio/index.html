@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Truck Radio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Truck Radio">
+  <meta name="theme-color" content="#1d3557">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/radio.css">
+  <style>
+    :root { --ink: #2d2a32; --paper: #fffaf0; --red: #ff6b6b; --yellow: #ffd93d; --orange: #ffb347; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "Fredoka", "Arial Rounded MT Bold", system-ui, sans-serif; color: var(--ink);
+      background: #1d3557 radial-gradient(circle at 50% 20%, #2b4a7a 0, #1d3557 60%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+      -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+    }
+    h1 { color: #fff; font-size: clamp(22px, 5vw, 34px); margin: 0 0 6px; text-align: center; }
+    .who { color: #cfe3ff; font-weight: 600; margin: 0 0 40px; text-align: center; }
+    .who a { color: #ffd93d; }
+    #radio { width: 100%; max-width: 420px; margin-top: 36px; }
+    #radio .walkie { max-width: 420px; padding: 34px 22px 18px; }
+    #radio .ptt { width: 190px; height: 190px; font-size: 24px; }
+    #radio .scr-status { font-size: 20px; }
+    #radio .scr-chan { font-size: 12px; }
+    .safety { color: #9fb8dd; font-size: 14px; text-align: center; margin-top: 22px; max-width: 420px; }
+    .keepon { color: #9fb8dd; font-size: 13px; text-align: center; margin-top: 6px; }
+    @media (max-height: 600px) { .who { margin-bottom: 10px; } #radio { margin-top: 20px; } #radio .ptt { width: 140px; height: 140px; font-size: 18px; } .safety { display: none; } }
+  </style>
+</head>
+<body>
+  <h1>📻 Truck Radio</h1>
+  <p class="who" id="who"></p>
+  <div id="radio"></div>
+  <p class="safety">Tap once to talk, it sends by itself after 10 seconds. For passengers or when the truck is stopped.</p>
+  <p class="keepon">Keep this page open and the phone unlocked so new messages play out loud.</p>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/radio.js"></script>
+  <script>
+    (function () {
+      const q = new URLSearchParams(location.search);
+      const role = q.get("who") === "kid" ? "kid" : "dad";
+      const T = window.TRIP || {};
+      const me = role === "dad" ? (T.driverName || "Dad") : (T.kidName || "Bam Bam");
+      const them = role === "dad" ? (T.kidName || "Bam Bam") : (T.driverName || "Dad");
+      document.getElementById("who").innerHTML = `This is <b>${me}</b>'s radio · talking to <b>${them}</b>` +
+        (role === "dad" ? "" : ` · <a href="./">switch to Dad</a>`);
+      window.RADIO.mount(document.getElementById("radio"), { role, mode: role === "dad" ? "tap" : "hold", api: "../api/radio.php" });
+      // keep the screen awake where supported
+      if (navigator.wakeLock) {
+        const lock = () => navigator.wakeLock.request("screen").catch(() => {});
+        document.addEventListener("click", lock, { once: true });
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) lock(); });
+      }
+    })();
+  </script>
+</body>
+</html>
