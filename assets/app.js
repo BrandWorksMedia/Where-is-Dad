@@ -93,6 +93,17 @@
   let truckScale = 1;     // shrinks the truck while zoomed into a state
   let failures = 0;
   let arrivedShown = false;
+  let bootVersion = null;    // app_version seen on the first poll; a change means a new deploy
+
+  function maybeReload(v) {
+    if (!v) return;
+    if (bootVersion === null) { bootVersion = v; return; }
+    if (v === bootVersion) return;
+    const busy = document.querySelector(".walkie.is-recording, .walkie.is-receiving, .walkie.is-sending");
+    if (busy) return;                                   // try again on the next poll
+    setTimeout(() => location.reload(), 1500);          // small delay so the deploy finishes copying files
+    bootVersion = v;
+  }
 
   function placeTruck(lat, lon, cog, moving) {
     const p = M.proj(lon, lat);
@@ -313,6 +324,7 @@
       const j = await r.json();
       failures = 0;
       $("offline").hidden = true;
+      maybeReload(j.app_version);
       if (j.status === "waiting" || !j.latest) { showWaiting(); return; }
       last = j.latest;
       updateDashboard(last);

@@ -9,10 +9,10 @@ require __DIR__ . '/_common.php';
 
 $latest = read_latest();
 if ($latest === null) {
-    json_out(['status' => 'waiting', 'latest' => null, 'history' => []]);
+    json_out(['status' => 'waiting', 'latest' => null, 'history' => [], 'app_version' => app_version()]);
 }
 
-$out = ['status' => 'ok', 'latest' => $latest, 'server_time' => time()];
+$out = ['status' => 'ok', 'latest' => $latest, 'server_time' => time(), 'app_version' => app_version()];
 
 if (isset($_GET['history']) && is_file(HISTORY_FILE)) {
     $lines = file(HISTORY_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];

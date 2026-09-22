@@ -109,7 +109,7 @@ window.RADIO = (function () {
 
     let state = "idle";                 // idle | arming | recording | sending
     let stream = null, rec = null, chunks = [], recStart = 0, tick = null, stopTimer = null;
-    let lastSeenId = "", playing = false;
+    let lastSeenId = "", playing = false, bootVersion = null;
     const queue = [];
 
     function status(text, cls) {
@@ -257,6 +257,10 @@ window.RADIO = (function () {
       try {
         const url = `${API}?action=list${first || !lastSeenId ? "" : "&since=" + encodeURIComponent(lastSeenId)}&_=${Date.now()}`;
         const j = await (await fetch(url, { cache: "no-store" })).json();
+        if (j.app_version) {
+          if (bootVersion === null) bootVersion = j.app_version;
+          else if (j.app_version !== bootVersion && opts.reloadOnDeploy !== false && state === "idle" && !playing) { setTimeout(() => location.reload(), 1500); bootVersion = j.app_version; }
+        }
         if (first) {
           (j.clips || []).forEach(c => addChip(c));
           lastSeenId = j.latest_id || "";

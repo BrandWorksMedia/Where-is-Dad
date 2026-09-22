@@ -391,3 +391,42 @@ body.arrived #headline { color: #c0392b; animation: party 1s ease-in-out infinit
   #radio .walkie.is-recording .screen, #radio .walkie.is-receiving .screen, #radio .walkie.is-sending .screen, #radio .walkie.is-error .screen { display: block; }
   #radio .ptt { width: 74px; height: 74px; font-size: 11px; }
 }
+
+/* ============================================================
+   Tablet landscape (the wall iPad): map on top, one thin strip below.
+   Headline + stats share a row, progress bar under them, walkie-talkie
+   floats over the map's bottom-right corner.
+   ============================================================ */
+@media (orientation: landscape) and (min-height: 641px) {
+  #dash { grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 8px 12px; height: 168px; }
+  #where { grid-column: 1; display: block; padding: 10px 18px; min-width: 0; overflow: hidden; }
+  #headline { font-size: clamp(18px, 2.15vw, 28px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+  #subline { font-size: clamp(13px, 1.5vw, 18px); margin: 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #fact { display: none; }
+  #stats { grid-column: 2; display: flex; gap: 22px; padding: 8px 18px; align-items: center; }
+  .stat .v { font-size: clamp(16px, 1.9vw, 24px); white-space: nowrap; }
+  .stat .k { font-size: 10px; letter-spacing: .6px; }
+  #next-miles { font-size: 55%; }
+  #progress { grid-column: 1 / -1; padding: 6px 18px 6px; }
+  #pb { height: 16px; margin: 16px 20px 4px; }
+  #pb::after { inset: 5px 6px; border-top-width: 2px; }
+  .pb-mark { font-size: 16px; top: -22px; }
+  #pb-truck { font-size: 24px; top: -16px; }
+  #pb-text { font-size: 13px; }
+
+  /* the walkie-talkie floats over the map (same treatment as big-map mode) */
+  #radio.card {
+    position: fixed; right: 34px; bottom: calc(168px + 44px); z-index: 6;
+    padding: 0; border: 0; box-shadow: none; background: transparent; width: auto;
+  }
+  #radio .walkie { background: transparent; border: 0; box-shadow: none; padding: 0; gap: 0; width: auto; flex-direction: column; flex-wrap: nowrap; }
+  #radio .walkie::before, #radio .antenna, #radio .antenna-tip, #radio .grille, #radio .history { display: none; }
+  #radio .w-top { position: absolute; right: -4px; top: -4px; width: auto; }
+  #radio .screen { position: absolute; right: 0; bottom: 100%; margin-bottom: 10px; width: 230px; display: none; }
+  #radio .walkie.is-recording .screen, #radio .walkie.is-receiving .screen,
+  #radio .walkie.is-sending .screen, #radio .walkie.is-error .screen { display: block; }
+  #radio .ptt { width: 100px; height: 100px; font-size: 14px; }
+
+  /* keep the corners of the map free for the buttons */
+  #sound-pill { right: auto; bottom: auto; left: 50%; top: 12px; transform: translateX(-50%); }
+}

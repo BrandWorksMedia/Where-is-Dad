@@ -94,7 +94,7 @@ if ($action === 'list') {
         $new = array_slice($rows, -5);
     }
     $latest = $rows ? end($rows)['id'] : '';
-    json_out(['server_time' => time(), 'latest_id' => $latest, 'clips' => array_map($pub, $new)]);
+    json_out(['server_time' => time(), 'latest_id' => $latest, 'clips' => array_map($pub, $new), 'app_version' => app_version()]);
 }
 
 // ------------------------------------------------------------ clip

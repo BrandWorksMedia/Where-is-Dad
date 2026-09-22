@@ -127,7 +127,8 @@ A playful push-to-talk radio, voice clips only, **open to anyone with the link o
 - Clips are stored in `data/radio/` (web-blocked), newest 40 kept, 3 MB max each, served only
   through `api/radio.php`. Delete them with `…/api/admin.php?token=…&action=radio-clear`.
 - iOS tip: Settings → Safari → Microphone → Allow for bambamgo.com, so it stops asking.
-- In big-map mode the walkie-talkie shrinks to a floating red button in the bottom-right corner.
+- On a tablet in landscape and in big-map mode the walkie-talkie is a floating red button over the
+  map's bottom-right corner, so the map gets the room. In portrait it is the full yellow card.
 
 ## 6. Change names, landmarks, facts
 

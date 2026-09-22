@@ -9,6 +9,17 @@ define('ATTEMPT_LOG', DATA_DIR . '/receiver.log');
 define('CONFIG_JSON', DATA_DIR . '/config.json');      // the secret lives here (web-blocked, git-ignored)
 define('LEGACY_CONFIG', __DIR__ . '/config.php');     // older installs / hand-made config
 
+// Changes whenever a deploy touches the page, so open iPads know to reload themselves.
+function app_version(): string {
+    $root = dirname(__DIR__);
+    $t = 0;
+    foreach (['index.html', 'assets/app.js', 'assets/style.css', 'assets/config.js', 'assets/map.js',
+              'assets/radio.js', 'assets/radio.css', 'radio/index.html'] as $f) {
+        $m = @filemtime("$root/$f"); if ($m && $m > $t) $t = $m;
+    }
+    return (string)$t;
+}
+
 function json_out($data, int $code = 200): void {
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');
